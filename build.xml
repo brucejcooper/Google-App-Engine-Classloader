@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     May 13, 2011 11:01:55 AM                                                        
+
+     project    
+     description
+                   
+     bruce                                                                
+     ====================================================================== -->
+<project name="project" default="buildtestagent">
+    <description>
+            Build file to construct sample agent to be sent to GAE
+    </description>
+	
+	<property name="agent.src" value="agentSrc"/>
+	<property name="agent.dir" value="agent/classes"/>
+
+    <target name="buildtestagent" description="builds a jar file which contains a test agent to be send by file upload to GAE">
+    	<javac destdir="${agent.dir}" srcdir="${agent.src}">
+	      <classpath>
+	        <pathelement path="${java.class.path}/"/>
+	        <pathelement location="war/WEB-INF/classes"/>
+	      </classpath>
+    	</javac>
+    	<copy todir="${agent.dir}">
+    		<fileset dir="${agent.src}" excludes="**/*.java"/>
+    	</copy>
+        <jar file="agent.jar">
+        	<fileset dir="${agent.dir}"/>
+    	</jar>
+    </target>
+
+</project>
+ 

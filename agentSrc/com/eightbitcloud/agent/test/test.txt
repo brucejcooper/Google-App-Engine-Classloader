@@ -1,0 +1,1 @@
+This is some test text, to make sure that resource loading works.
