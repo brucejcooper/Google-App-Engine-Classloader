@@ -22,11 +22,13 @@
 		<delete>
         	<fileset dir="${agent.dir}/classes" includes="**/*"/>
         	<fileset dir="${agent.dir}/lib" includes="*.jar"/>
+			<filename name="app.jar"/>
+			<filename name="simple.jar"/>
 		</delete>
 	</target>
 	
 	<target name="compileagent">
-    	<javac destdir="${agent.dir}/classes" srcdir="${agent.src}">
+    	<javac destdir="${agent.dir}/classes" srcdir="${agent.src}" source="1.6" target="1.6">
 	      <classpath>
 	        <pathelement path="${java.class.path}/"/>
 	        <pathelement location="war/WEB-INF/classes"/>
@@ -43,7 +45,7 @@
     	</jar>
         <jar file="app.jar">
         	<fileset dir="${agent.dir}" includes="classes/com/eightbitcloud/agent/test/app/"/>
-        	<fileset dir="${agent.dir}" includes="lib/"/>
+        	<fileset dir="${agent.dir}" excludes="classes/"/>
     	</jar>
 	</target>
 

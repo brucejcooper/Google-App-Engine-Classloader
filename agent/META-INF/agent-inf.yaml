@@ -1,0 +1,2 @@
+class: com.eightbitcloud.agent.test.app.TestAgentInCompoundJar
+type: java

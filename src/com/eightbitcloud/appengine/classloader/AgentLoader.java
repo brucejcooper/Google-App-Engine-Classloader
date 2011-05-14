@@ -1,8 +1,11 @@
 package com.eightbitcloud.appengine.classloader;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.yaml.snakeyaml.Yaml;
 
 import com.eightbitcloud.appengine.testing.Agent;
 import com.google.appengine.api.blobstore.BlobKey;
@@ -18,12 +21,15 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
  */
 public class AgentLoader {
     private DatastoreClassLoader loader;
+    Map<String, Object> manifest;
+
 
     public AgentLoader(ClassLoader parent, BlobKey key) throws EntityNotFoundException, IOException {
         loader = new DatastoreClassLoader(parent);
         
         ZipInputStream in = ZipScanner.getZipStream(key);
         ZipScanner.scan(in, new ZipEntryHandler() {
+            @SuppressWarnings("unchecked")
             @Override
             public void readZipEntry(ZipEntry entry, ZipInputStream zin) throws IOException {
                 String name = entry.getName();
@@ -35,7 +41,7 @@ public class AgentLoader {
                     ZipInputStream subZip = new ZipInputStream(zin);
                     loader.addClassJar(subZip);
                 } else if (name.equals("META-INF/agent-inf.yaml")) {
-                    // TODO deal with META-INF or app.yaml or whatever we end up using to deal with the application descriptor
+                    manifest = (Map<String, Object>) new Yaml().load(zin);
                 }
             }
         });
@@ -52,8 +58,7 @@ public class AgentLoader {
     }
     
     private String getAgentClassName() {
-        // TODO fetch this from the agent manifest
-        return "com.eightbitcloud.agent.test.app.TestAgentInCompoundJar";
+        return (String) manifest.get("class");
     }
 
     public Agent createAgent() throws InstantiationException, IllegalAccessException, ClassNotFoundException {

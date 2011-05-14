@@ -54,7 +54,7 @@ public class DatastoreClassLoader extends ClassLoader {
 
 
     /**
-     * Provides the ability to add another ZIP (Blob) in after the classloader has been constructed.  This
+     * Provides the ability to add another ZIP in after the classloader has been constructed.  This
      * may be useful if you have a core WAR looking thing, but want to add additional JARs based upon
      * configuration etc... 
      * 
@@ -77,6 +77,15 @@ public class DatastoreClassLoader extends ClassLoader {
     }
     
     
+    /**
+     * Adds an additional class into the byteStream cache directly.  Used by
+     * AgentLoader to include classes in the WARish thing (hence why it is
+     * package protected)
+     * 
+     * @param className The file name of the class to add with slashes (/) instead of periods, and .class on the end
+     * @param data  The bytes that represent the class.
+     * @throws IOException
+     */
     void addClass(String className, byte[] data) throws IOException {
         byteStreams.put(className, data);
     }
