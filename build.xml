@@ -2,8 +2,9 @@
 <!-- ====================================================================== 
      May 13, 2011 11:01:55 AM                                                        
 
-     project    
-     description
+     This Build file only builds the example JARs that go into the application.
+     It does not build the GAE application itself.  It is assumed that this will
+     be done via Eclipse
                    
      bruce                                                                
      ====================================================================== -->
