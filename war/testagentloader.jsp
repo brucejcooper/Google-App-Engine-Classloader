@@ -6,19 +6,18 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>Agent Test Page</title>
 </head>
 <body>
 
 This page executes an agent that has been uploaded to the Google App Engine datastore.  The agent is of a form similar to that of a WAR file, allowing for complete app uploads.
 
-<h3>Output from executing class <em>com.eightbitcloud.agent.test.simple.TestAgentInOneJar</em> in Jar file</h3>
+<h3>Agent Output</h3>
 <pre>
-<%= new ClassloaderTest().testSimpleJar(request.getParameter("agent")) %>
+<%=new ClassloaderTest().testAgent(request.getParameter("agent"))%>
 </pre>
 
 <a href="index.jsp">Back to the upload page</a>
-
 
 </body>
 </html>

@@ -34,7 +34,6 @@ public class AgentLoader {
                 } else if (name.startsWith("lib/") && name.endsWith(".jar")) {
                     ZipInputStream subZip = new ZipInputStream(zin);
                     loader.addClassJar(subZip);
-                    subZip.close();
                 } else if (name.equals("META-INF/agent-inf.yaml")) {
                     // TODO deal with META-INF or app.yaml or whatever we end up using to deal with the application descriptor
                 }
