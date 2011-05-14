@@ -7,26 +7,49 @@
                    
      bruce                                                                
      ====================================================================== -->
-<project name="project" default="buildtestagent">
+<project name="project" default="all">
     <description>
             Build file to construct sample agent to be sent to GAE
     </description>
 	
 	<property name="agent.src" value="agentSrc"/>
-	<property name="agent.dir" value="agent/classes"/>
-
-    <target name="buildtestagent" description="builds a jar file which contains a test agent to be send by file upload to GAE">
-    	<javac destdir="${agent.dir}" srcdir="${agent.src}">
+	<property name="agent.dir" value="agent/"/>
+	
+	<target name="all" depends="buildsimplejar, buildappjar">
+	</target>
+	
+	<target name="clean">
+		<delete>
+        	<fileset dir="${agent.dir}/classes" includes="**/*"/>
+        	<fileset dir="${agent.dir}/lib" includes="*.jar"/>
+		</delete>
+	</target>
+	
+	<target name="compileagent">
+    	<javac destdir="${agent.dir}/classes" srcdir="${agent.src}">
 	      <classpath>
 	        <pathelement path="${java.class.path}/"/>
 	        <pathelement location="war/WEB-INF/classes"/>
 	      </classpath>
     	</javac>
-    	<copy todir="${agent.dir}">
+    	<copy todir="${agent.dir}/classes">
     		<fileset dir="${agent.src}" excludes="**/*.java"/>
     	</copy>
-        <jar file="agent.jar">
-        	<fileset dir="${agent.dir}"/>
+	</target>
+	
+	<target name="buildappjar" depends="compileagent">
+        <jar file="${agent.dir}/lib/example.jar">
+        	<fileset dir="${agent.dir}/classes" includes="com/eightbitcloud/agent/test/jar/"/>
+    	</jar>
+        <jar file="app.jar">
+        	<fileset dir="${agent.dir}" includes="classes/com/eightbitcloud/agent/test/app/"/>
+        	<fileset dir="${agent.dir}" includes="lib/"/>
+    	</jar>
+	</target>
+
+    <target name="buildsimplejar" depends="compileagent" description="builds a jar file which contains a test agent to be send by file upload to GAE">
+        <jar file="simple.jar">
+        	<fileset dir="${agent.dir}/classes" includes="com/eightbitcloud/agent/test/simple/"/>
     	</jar>
     </target>
 

@@ -21,16 +21,16 @@ import com.google.appengine.api.files.FileServiceFactory;
  * 
  * @author bruce
  */
-public class DatastoreClassloader extends ClassLoader {
+public class DatastoreClassLoader extends ClassLoader {
     private FileService fileService = FileServiceFactory.getFileService();
     /**
      * Cached copy of the byte streams of every class in the zip files.  Not efficient, but good for demonstration purposes
      */
     private Map<String, byte[]> byteStreams = new HashMap<String, byte[]>();
     
-    Logger logger = Logger.getLogger(DatastoreClassloader.class.getName());
+    Logger logger = Logger.getLogger(DatastoreClassLoader.class.getName());
 
-    
+
     /**
      * 
      * @param parent Parent class loader.  
@@ -38,42 +38,49 @@ public class DatastoreClassloader extends ClassLoader {
      * @throws EntityNotFoundException
      * @throws IOException
      */
-    public DatastoreClassloader(ClassLoader parent, BlobKey... keys) throws EntityNotFoundException, IOException {
+    public DatastoreClassLoader(ClassLoader parent, BlobKey... keys) throws EntityNotFoundException, IOException {
         super(parent);
         
-        for (BlobKey zipKey: keys) {
-            AppEngineFile f = fileService.getBlobFile(zipKey);
+        for (BlobKey key: keys) {
+            AppEngineFile f = fileService.getBlobFile(key);
             InputStream in = Channels.newInputStream(fileService.openReadChannel(f, false));
             
-            //TODO For the moment, we'll read every class definition.  In the future, we'll make this random access for better performance.
             ZipInputStream zin = new ZipInputStream(in);
-            ZipEntry entry;
-            while((entry = zin.getNextEntry()) != null) {
-                String name = entry.getName();
-                if (!entry.isDirectory()) {
-                    // Java classloading semantics specify a first-in best-dressed policy for class loading.  As a result, we don't want to
-                    // overwrite any classes that have already been specified
-                    if (byteStreams.containsKey(name)) {
-                        logger.warning(f.getFullPath() + " has a duplicate defintion of class/resource " + name + ". It will be ignored");
-                    } else {
-                        int count;
-                        int total = (int) entry.getSize();
-                        int pos = 0;
-                        byte[] data = new byte[total];
-                        while (pos < total && (count = zin.read(data, pos, total)) != -1) {
-                            pos += count;
-                        }
-                    
-                        byteStreams.put(name, data);
-                    }
-                }
-            }
-            zin.close();
+            addClassJar(zin);
             in.close();
         }
     }
+    
 
 
+    /**
+     * Provides the ability to add another ZIP (Blob) in after the classloader has been constructed.  This
+     * may be useful if you have a core WAR looking thing, but want to add additional JARs based upon
+     * configuration etc... 
+     * 
+     * @param key
+     * @throws IOException
+     * @throws EntityNotFoundException
+     */
+    public void addClassJar(ZipInputStream zin) throws IOException {
+        ZipScanner.scan(zin, new ZipEntryHandler() {
+            @Override
+            public void readZipEntry(ZipEntry entry, ZipInputStream in) throws IOException {
+                String name = entry.getName();
+                if (byteStreams.containsKey(name)) {
+                    logger.warning("duplicate defintion of class/resource " + name + ". It will be ignored");
+                } else {
+                    addClass(name, ZipScanner.readZipBytes(entry, in));
+                }
+            }
+        });
+    }
+    
+    
+    void addClass(String className, byte[] data) throws IOException {
+        byteStreams.put(className, data);
+    }
+    
     @Override
     protected Class<?> loadClass (String name, boolean resolve) 
       throws ClassNotFoundException {
